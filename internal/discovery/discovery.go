@@ -54,9 +54,6 @@ func Scan(root string) ([]Module, error) {
 			if err != nil {
 				rel = dir
 			}
-			if rel == "." {
-				rel = "."
-			}
 			modules = append(modules, Module{
 				Dir:    rel,
 				AbsDir: dir,

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// Info holds version information for terraform and terragrunt.
+// Info holds version information for terraform/opentofu and terragrunt.
 type Info struct {
 	Terraform  string
 	Terragrunt string
@@ -14,13 +14,26 @@ type Info struct {
 
 var versionRe = regexp.MustCompile(`v?(\d+\.\d+\.\d+\S*)`)
 
-// Detect runs terraform --version and terragrunt --version and extracts
-// the version strings. Returns "not found" if a binary is missing.
+// Detect runs terraform --version (or opentofu --version) and terragrunt --version
+// and extracts the version strings. Returns "not found" if a binary is missing.
 func Detect() Info {
 	return Info{
-		Terraform:  detectOne("terraform"),
+		Terraform:  detectTerraform(),
 		Terragrunt: detectOne("terragrunt"),
 	}
+}
+
+// detectTerraform checks for tofu first, then falls back to terraform.
+func detectTerraform() string {
+	// Try tofu first
+	if version := detectOne("tofu"); version != "not found" {
+		return version + " (tofu)"
+	}
+	// Fall back to terraform
+	if version := detectOne("terraform"); version != "not found" {
+		return version
+	}
+	return "not found"
 }
 
 func detectOne(bin string) string {

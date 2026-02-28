@@ -16,6 +16,10 @@ type Dependency struct {
 	ConfigPath string
 	// Type is "dependency", "dependencies", or "include".
 	Type string
+	// StartLine is the 0-indexed line number where the block starts.
+	StartLine int
+	// EndLine is the 0-indexed line number where the block ends.
+	EndLine int
 }
 
 var (
@@ -44,7 +48,11 @@ func Parse(hclPath string) ([]Dependency, error) {
 
 	var currentLabel string
 	var currentType string
+	var currentStartLine int
+	var currentConfigPath string
 	inBlock := false
+	braceDepth := 0
+	lineNum := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -53,7 +61,11 @@ func Parse(hclPath string) ([]Dependency, error) {
 		if m := reDependency.FindStringSubmatch(line); m != nil {
 			currentLabel = m[1]
 			currentType = "dependency"
+			currentStartLine = lineNum
+			currentConfigPath = ""
 			inBlock = true
+			braceDepth = 1
+			lineNum++
 			continue
 		}
 
@@ -64,21 +76,22 @@ func Parse(hclPath string) ([]Dependency, error) {
 				currentLabel = "root"
 			}
 			currentType = "include"
+			currentStartLine = lineNum
+			currentConfigPath = ""
 			inBlock = true
+			braceDepth = 1
+			lineNum++
 			continue
 		}
 
 		if inBlock {
+			// Count braces for proper block tracking
+			braceDepth += strings.Count(line, "{") - strings.Count(line, "}")
+
 			// config_path inside a dependency block.
 			if currentType == "dependency" {
 				if m := reConfigPath.FindStringSubmatch(line); m != nil {
-					deps = append(deps, Dependency{
-						Label:      currentLabel,
-						ConfigPath: m[1],
-						Type:       currentType,
-					})
-					inBlock = false
-					continue
+					currentConfigPath = m[1]
 				}
 			}
 
@@ -89,18 +102,21 @@ func Parse(hclPath string) ([]Dependency, error) {
 					if p == "" {
 						p = "find_in_parent_folders()"
 					}
-					deps = append(deps, Dependency{
-						Label:      currentLabel,
-						ConfigPath: p,
-						Type:       currentType,
-					})
-					inBlock = false
-					continue
+					currentConfigPath = p
 				}
 			}
 
-			// Closing brace ends the block.
-			if strings.TrimSpace(line) == "}" {
+			// Closing brace ends the block when depth reaches 0.
+			if braceDepth <= 0 {
+				if currentConfigPath != "" {
+					deps = append(deps, Dependency{
+						Label:      currentLabel,
+						ConfigPath: currentConfigPath,
+						Type:       currentType,
+						StartLine:  currentStartLine,
+						EndLine:    lineNum,
+					})
+				}
 				inBlock = false
 			}
 		}
@@ -114,9 +130,13 @@ func Parse(hclPath string) ([]Dependency, error) {
 					Label:      label,
 					ConfigPath: p,
 					Type:       "dependencies",
+					StartLine:  lineNum,
+					EndLine:    lineNum,
 				})
 			}
 		}
+
+		lineNum++
 	}
 
 	return deps, scanner.Err()

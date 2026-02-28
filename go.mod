@@ -1,4 +1,4 @@
-module github.com/lazyterra/lazyterra
+module github.com/NikitaForGit/LazyTerra
 
 go 1.24.2
 
