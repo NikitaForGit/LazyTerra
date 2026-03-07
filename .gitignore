@@ -1,5 +1,8 @@
-# Binary
-lazyterra
+# Binary (root only, not cmd/lazyterra/ directory)
+/lazyterra
+
+# GoReleaser
+dist/
 
 # Go
 *.exe

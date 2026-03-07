@@ -1,19 +1,26 @@
-.PHONY: build install clean
+.PHONY: build install clean uninstall lint test
 
-BINARY := lazyterra
-MODULE := github.com/lazyterra/lazyterra
+BINARY  := lazyterra
+MODULE  := github.com/NikitaForGit/LazyTerra
+VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+LDFLAGS := -s -w -X main.version=$(VERSION)
 
 build:
-	go build -o $(BINARY) ./cmd/lazyterra/
+	go build -ldflags "$(LDFLAGS)" -o $(BINARY) ./cmd/lazyterra/
 
 install:
-	go install ./cmd/lazyterra/
+	go install -ldflags "$(LDFLAGS)" ./cmd/lazyterra/
 
 clean:
 	rm -f $(BINARY)
+	rm -rf dist/
+
+uninstall:
+	rm -f $(shell go env GOPATH)/bin/$(BINARY)
 
 lint:
+	@which golangci-lint > /dev/null || (echo "golangci-lint not found. Install: https://golangci-lint.run/welcome/install/" && exit 1)
 	golangci-lint run ./...
 
 test:
-	go test ./...
+	go test -race -v ./...
