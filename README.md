@@ -1,8 +1,11 @@
 # LazyTerra
 
-A terminal UI for [Terragrunt](https://terragrunt.gruntwork.io/) with Vim-style keybindings.
+A terminal UI that brings simplicity to Terragrunt workflows. Navigate module trees. Run multi-module operations. Browse and modify state. View dependencies.
 
-Built with the [Charm](https://charm.sh/) stack (Bubble Tea / Lip Gloss).
+[![CI Status](https://github.com/NikitaForGit/LazyTerra/workflows/CI/badge.svg)](https://github.com/NikitaForGit/LazyTerra/actions)
+[![Release](https://img.shields.io/github/v/release/NikitaForGit/LazyTerra)](https://github.com/NikitaForGit/LazyTerra/releases/latest)
+[![License](https://img.shields.io/github/license/NikitaForGit/LazyTerra)](LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/NikitaForGit/LazyTerra)](https://goreportcard.com/report/github.com/NikitaForGit/LazyTerra)
 
 
 ## Demo
@@ -267,6 +270,10 @@ Use `?` inside the TUI to open the context-sensitive help overlay at any time.
 - [Terraform](https://www.terraform.io/) or [OpenTofu](https://opentofu.org/)
 - [Terragrunt](https://terragrunt.gruntwork.io/)
 - A terminal with 256-color support
+
+## Built With
+
+- [Charm](https://charm.sh/) stack (Bubble Tea / Lip Gloss)
 
 ## Disclaimer
 
