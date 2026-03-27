@@ -1,0 +1,33 @@
+version: "2"
+
+linters:
+  enable:
+    - errcheck      # Check for unchecked errors
+    - govet         # Standard Go vet checks
+    - ineffassign   # Detect ineffectual assignments
+    - staticcheck   # Go static analysis (includes gosimple)
+    - unused        # Check for unused code
+    - misspell      # Check for misspelled English words
+  settings:
+    errcheck:
+      exclude-functions:
+        - (io.Closer).Close
+        - (*os.File).Close
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - errcheck
+
+formatters:
+  enable:
+    - gofmt         # Check code formatting
+    - goimports     # Check import formatting
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+run:
+  timeout: 5m
+  tests: true

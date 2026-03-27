@@ -1,0 +1,57 @@
+project_name: lazyterra
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./cmd/lazyterra/
+    binary: lazyterra
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+
+archives:
+  - format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+
+brews:
+  - repository:
+      owner: NikitaForGit
+      name: homebrew-lazyterra
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/NikitaForGit/LazyTerra"
+    description: "A TUI for Terragrunt"
+    license: "MIT"
+    install: |
+      bin.install "lazyterra"
+    test: |
+      system "#{bin}/lazyterra", "--version"
+
+release:
+  github:
+    owner: NikitaForGit
+    name: LazyTerra
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
